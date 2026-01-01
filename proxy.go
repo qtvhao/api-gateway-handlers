@@ -185,6 +185,33 @@ func (p *ProxyHandler) proxyRequest(c *gin.Context, targetURL, targetPath string
 	proxy.ServeHTTP(c.Writer, c.Request)
 }
 
+// ProxyToAuthelia returns a handler that proxies requests to internal Authelia
+// Authelia is never exposed publicly - only accessible via internal Docker network
+func (p *ProxyHandler) ProxyToAuthelia() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		autheliaURL := p.config.Authelia.InternalURL
+		if autheliaURL == "" {
+			p.logger.Error("Authelia URL not configured")
+			c.JSON(http.StatusServiceUnavailable, gin.H{
+				"error": gin.H{
+					"code":    "AUTH_SERVICE_UNAVAILABLE",
+					"message": "Authentication service not configured",
+				},
+			})
+			return
+		}
+
+		// Extract the path after /api/oidc or /api/auth
+		path := c.Param("path")
+		if path == "" {
+			path = "/"
+		}
+
+		targetPath := "/api/oidc" + path
+		p.proxyRequest(c, autheliaURL, targetPath)
+	}
+}
+
 // proxyWebSocket handles WebSocket proxy
 func (p *ProxyHandler) proxyWebSocket(c *gin.Context, targetURL string) {
 	target, err := url.Parse(targetURL)
