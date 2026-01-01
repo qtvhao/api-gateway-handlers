@@ -4,6 +4,10 @@
 //
 // getGeneratedServiceURL switch cases for all services
 //
+// Associated Frontend Files:
+//   - web/app/src/lib/api.ts (apiClient - all service API calls)
+//   - web/app/src/App.tsx (routes to all service pages)
+//
 // To regenerate, run:
 //   python3 agent/src/fuel2/utils/generate_api_gateway_routes.py
 

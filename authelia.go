@@ -3,6 +3,12 @@
 // This file implements Authelia authentication proxy handlers.
 // Authelia runs INTERNALLY behind the API Gateway and is never exposed publicly.
 //
+// Associated Frontend Files:
+//   - web/app/src/hooks/useAuth.ts (login, logout, session management)
+//   - web/app/src/pages/LoginPage.tsx (login form UI)
+//   - web/app/src/lib/api.ts (apiClient - auth token handling)
+//   - web/app/src/components/auth/ProtectedRoute.tsx (auth state checks)
+//
 // Architecture:
 //   Browser -> API Gateway (:8080) -> Authelia (:9091 internal) -> Redis (sessions)
 //

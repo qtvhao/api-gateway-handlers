@@ -2,6 +2,11 @@
 //
 // This file contains type definitions for Authelia authentication handlers.
 //
+// Associated Frontend Files:
+//   - web/app/src/hooks/useAuth.ts (LoginResponse, User types)
+//   - web/app/src/pages/LoginPage.tsx (login form data)
+//   - web/app/src/lib/api.ts (API request/response types)
+//
 // Architecture:
 //   Browser -> API Gateway (:8080) -> Authelia (:9091 internal) -> Redis (sessions)
 //

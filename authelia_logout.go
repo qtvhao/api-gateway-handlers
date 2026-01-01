@@ -2,6 +2,11 @@
 //
 // This file implements the Logout handler for Authelia authentication.
 //
+// Associated Frontend Files:
+//   - web/app/src/hooks/useAuth.ts (logout function - POST /auth/logout)
+//   - web/app/src/components/layout/AppLayout.tsx (logout button)
+//   - web/app/src/lib/api.ts (apiClient.post for logout)
+//
 // Architecture:
 //   Browser -> API Gateway (:8080) -> Authelia (:9091 internal) -> Redis (sessions)
 //

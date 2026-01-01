@@ -3,6 +3,10 @@
 //
 // Dashboard Handler
 // Aggregates data from multiple bounded contexts for the dashboard
+//
+// Associated Frontend Files:
+//   - web/app/src/pages/DashboardPage.tsx (main dashboard view)
+//   - web/app/src/lib/api.ts (api.get('/dashboard') call)
 package handlers
 
 import (

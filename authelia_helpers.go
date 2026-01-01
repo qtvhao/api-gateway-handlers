@@ -2,6 +2,10 @@
 //
 // This file contains helper functions for Authelia authentication handlers.
 //
+// Associated Frontend Files:
+//   - web/app/src/hooks/useAuth.ts (error handling for auth responses)
+//   - web/app/src/lib/api.ts (error formatting and display)
+//
 // Architecture:
 //   Browser -> API Gateway (:8080) -> Authelia (:9091 internal) -> Redis (sessions)
 //

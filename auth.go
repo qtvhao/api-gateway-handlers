@@ -2,6 +2,11 @@
 //
 // DEPRECATED: This file is deprecated. Use authelia.go instead.
 //
+// Associated Frontend Files:
+//   - web/app/src/hooks/useAuth.ts (authentication hook)
+//   - web/app/src/pages/LoginPage.tsx (login form)
+//   - web/app/src/lib/api.ts (auth token management)
+//
 // Authentication is now handled by Authelia (internal only - never exposed publicly).
 // See: handlers/authelia.go for the new implementation.
 //

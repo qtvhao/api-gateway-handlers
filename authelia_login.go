@@ -2,6 +2,11 @@
 //
 // This file implements the Login handler for Authelia authentication.
 //
+// Associated Frontend Files:
+//   - web/app/src/hooks/useAuth.ts (login function - POST /auth/login)
+//   - web/app/src/pages/LoginPage.tsx (login form submission)
+//   - web/app/src/lib/api.ts (apiClient.post for login)
+//
 // Architecture:
 //   Browser -> API Gateway (:8080) -> Authelia (:9091 internal) -> Redis (sessions)
 //

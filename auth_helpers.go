@@ -3,6 +3,10 @@
 // IMPORTANT: Authentication is handled by Authelia (internal only).
 // This file contains only utility functions, NOT credential validation.
 //
+// Associated Frontend Files:
+//   - web/app/src/hooks/useAuth.ts (user name extraction for display)
+//   - web/app/src/components/layout/AppLayout.tsx (user display name)
+//
 // Architecture:
 //   Browser -> API Gateway (:8080) -> Authelia (:9091 internal) -> Redis (sessions)
 //
