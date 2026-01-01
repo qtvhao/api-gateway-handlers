@@ -18,8 +18,11 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"go.uber.org/zap"
 )
 
@@ -43,9 +46,16 @@ func (h *AutheliaHandler) Login(c *gin.Context) {
 		return
 	}
 
-	// Convert to Authelia format (email -> username)
+	// Extract username from email (e.g., admin@ugjb.com -> admin)
+	// Authelia uses username, not email, for authentication
+	username := req.Email
+	if idx := strings.Index(req.Email, "@"); idx > 0 {
+		username = req.Email[:idx]
+	}
+
+	// Convert to Authelia format
 	autheliaReq := autheliaFirstFactorRequest{
-		Username:       req.Email, // Authelia uses username, we accept email
+		Username:       username,
 		Password:       req.Password,
 		KeepMeLoggedIn: req.KeepMeLoggedIn,
 		TargetURL:      req.TargetURL,
@@ -105,9 +115,8 @@ func (h *AutheliaHandler) Login(c *gin.Context) {
 func (h *AutheliaHandler) handleLoginResponse(c *gin.Context, resp *http.Response, req *AutheliaLoginRequest, autheliaResp *autheliaFirstFactorResponse, body []byte) {
 	switch resp.StatusCode {
 	case http.StatusOK:
-		// Forward Set-Cookie headers from Authelia to client
+		// Forward session cookies to client
 		for _, cookie := range resp.Cookies() {
-			// Adjust cookie domain if needed
 			if cookie.Name == h.config.Authelia.SessionCookieName {
 				cookie.Domain = h.config.Authelia.SessionDomain
 				cookie.Path = "/"
@@ -118,12 +127,46 @@ func (h *AutheliaHandler) handleLoginResponse(c *gin.Context, resp *http.Respons
 			http.SetCookie(c.Writer, cookie)
 		}
 
+		// Extract username from email for user info
+		username := req.Email
+		if idx := strings.Index(req.Email, "@"); idx > 0 {
+			username = req.Email[:idx]
+		}
+
+		// Generate JWT token for API authentication
+		expiresAt := time.Now().Add(h.config.JWTExpiration)
+		claims := &Claims{
+			UserID: username,
+			Email:  req.Email,
+			Roles:  []string{"user"},
+			RegisteredClaims: jwt.RegisteredClaims{
+				ExpiresAt: jwt.NewNumericDate(expiresAt),
+				IssuedAt:  jwt.NewNumericDate(time.Now()),
+				Issuer:    "ugjb-api-gateway",
+				Subject:   username,
+			},
+		}
+
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		tokenString, err := token.SignedString([]byte(h.config.JWTSecret))
+		if err != nil {
+			h.logger.Error("Failed to generate JWT token", zap.Error(err))
+			sendInternalError(c)
+			return
+		}
+
 		h.logger.Info("User logged in successfully", zap.String("email", req.Email))
 
+		// Return response compatible with frontend expectations
 		c.JSON(http.StatusOK, gin.H{
-			"status": "OK",
+			"status":     "OK",
+			"token":      tokenString,
+			"expires_at": expiresAt.UTC().Format(time.RFC3339),
 			"user": gin.H{
+				"id":    username,
+				"name":  username,
 				"email": req.Email,
+				"roles": []string{"user"},
 			},
 			"redirect": autheliaResp.Data.Redirect,
 		})
