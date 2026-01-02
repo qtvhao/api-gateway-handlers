@@ -6,6 +6,11 @@
 //
 // To regenerate, run:
 //   python3 agent/src/fuel2/utils/generate_api_gateway_routes.py
+//
+// Associated Frontend Files:
+//   - web/app/src/lib/api.ts (apiClient - all API calls routed through gateway)
+//   - web/app/src/App.tsx (main application router)
+//   - web/app/src/pages/* (all page components)
 
 package handlers
 
