@@ -31,47 +31,6 @@ func NewProxyHandler(cfg *config.Config, logger *zap.Logger) *ProxyHandler {
 	}
 }
 
-// getServiceURL returns the URL for a given service name
-func (p *ProxyHandler) getServiceURL(serviceName string) string {
-	switch serviceName {
-	// Infrastructure Services
-	case "frontend":
-		return p.config.ServiceURLs.Frontend
-	case "ollama":
-		return p.config.ServiceURLs.Ollama
-	case "docker_registry":
-		return p.config.ServiceURLs.DockerRegistry
-	case "bugsink":
-		return p.config.ServiceURLs.Bugsink
-
-	// System Integration Bounded Context
-	case "system_integration":
-		return p.config.ServiceURLs.SystemIntegration
-
-	// HR Management Bounded Context
-	case "employee_registry":
-		return p.config.ServiceURLs.EmployeeRegistry
-	case "hr_management":
-		return p.config.ServiceURLs.HRManagement
-
-	// Project Management Bounded Context
-	case "sprint_coordinator":
-		return p.config.ServiceURLs.SprintCoordinator
-	case "task_dispatcher":
-		return p.config.ServiceURLs.TaskDispatcher
-
-	// User Preferences Bounded Context
-	case "user_preferences":
-		return p.config.ServiceURLs.UserPreferences
-	case "preferences_service":
-		return p.config.ServiceURLs.PreferencesService
-
-	default:
-		// Fall back to generated service URLs
-		return p.getGeneratedServiceURL(serviceName)
-	}
-}
-
 // ProxyToService returns a handler that proxies to a backend service
 func (p *ProxyHandler) ProxyToService(serviceName, targetPath string) gin.HandlerFunc {
 	return func(c *gin.Context) {

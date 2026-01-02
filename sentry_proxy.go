@@ -38,34 +38,39 @@ func NewSentryProxyHandler(cfg *config.Config, logger *zap.Logger) *SentryProxyH
 
 // ProxySentryStore handles /sentry/api/{project_id}/store/ endpoint
 // This is the main endpoint for receiving error events
+// Accepts sentry_key from either X-Sentry-Auth header or query string
 func (h *SentryProxyHandler) ProxySentryStore() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Validate Sentry authentication header
-		authHeader := c.GetHeader("X-Sentry-Auth")
-		if authHeader == "" {
-			c.JSON(http.StatusForbidden, gin.H{
-				"error": "Missing X-Sentry-Auth header",
-			})
-			return
-		}
+		// Try to get sentry_key from query string first (DSN format)
+		sentryKey := c.Query("sentry_key")
 
-		// Parse sentry_key from auth header
-		sentryKey := ""
-		parts := strings.Split(authHeader, ",")
-		for _, part := range parts {
-			part = strings.TrimSpace(part)
-			if strings.HasPrefix(part, "Sentry ") {
-				part = strings.TrimPrefix(part, "Sentry ")
+		// If not in query string, try X-Sentry-Auth header
+		if sentryKey == "" {
+			authHeader := c.GetHeader("X-Sentry-Auth")
+			if authHeader == "" {
+				c.JSON(http.StatusForbidden, gin.H{
+					"error": "Missing sentry_key in query string or X-Sentry-Auth header",
+				})
+				return
 			}
-			if strings.HasPrefix(part, "sentry_key=") {
-				sentryKey = strings.TrimPrefix(part, "sentry_key=")
-				break
+
+			// Parse sentry_key from auth header
+			parts := strings.Split(authHeader, ",")
+			for _, part := range parts {
+				part = strings.TrimSpace(part)
+				if strings.HasPrefix(part, "Sentry ") {
+					part = strings.TrimPrefix(part, "Sentry ")
+				}
+				if strings.HasPrefix(part, "sentry_key=") {
+					sentryKey = strings.TrimPrefix(part, "sentry_key=")
+					break
+				}
 			}
 		}
 
 		if sentryKey == "" {
 			c.JSON(http.StatusBadRequest, gin.H{
-				"error": "Invalid X-Sentry-Auth header: missing sentry_key",
+				"error": "Missing sentry_key",
 			})
 			return
 		}
