@@ -40,36 +40,32 @@ func NewSentryProxyHandler(cfg *config.Config, logger *zap.Logger) *SentryProxyH
 // This is the main endpoint for receiving error events
 func (h *SentryProxyHandler) ProxySentryStore() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Check for sentry_key in query string first (DSN format)
-		sentryKey := c.Query("sentry_key")
+		// Validate Sentry authentication header
+		authHeader := c.GetHeader("X-Sentry-Auth")
+		if authHeader == "" {
+			c.JSON(http.StatusForbidden, gin.H{
+				"error": "Missing X-Sentry-Auth header",
+			})
+			return
+		}
 
-		// If not in query, check X-Sentry-Auth header
-		if sentryKey == "" {
-			authHeader := c.GetHeader("X-Sentry-Auth")
-			if authHeader == "" {
-				c.JSON(http.StatusForbidden, gin.H{
-					"error": "Missing X-Sentry-Auth header or sentry_key query parameter",
-				})
-				return
+		// Parse sentry_key from auth header
+		sentryKey := ""
+		parts := strings.Split(authHeader, ",")
+		for _, part := range parts {
+			part = strings.TrimSpace(part)
+			if strings.HasPrefix(part, "Sentry ") {
+				part = strings.TrimPrefix(part, "Sentry ")
 			}
-
-			// Parse sentry_key from auth header
-			parts := strings.Split(authHeader, ",")
-			for _, part := range parts {
-				part = strings.TrimSpace(part)
-				if strings.HasPrefix(part, "Sentry ") {
-					part = strings.TrimPrefix(part, "Sentry ")
-				}
-				if strings.HasPrefix(part, "sentry_key=") {
-					sentryKey = strings.TrimPrefix(part, "sentry_key=")
-					break
-				}
+			if strings.HasPrefix(part, "sentry_key=") {
+				sentryKey = strings.TrimPrefix(part, "sentry_key=")
+				break
 			}
 		}
 
 		if sentryKey == "" {
 			c.JSON(http.StatusBadRequest, gin.H{
-				"error": "Missing sentry_key",
+				"error": "Invalid X-Sentry-Auth header: missing sentry_key",
 			})
 			return
 		}

@@ -75,6 +75,11 @@ func (h *DashboardHandler) GetAggregatedDashboard(c *gin.Context) {
 		"message": "Data aggregation not yet implemented",
 	}
 
+	data.Services["user_preferences"] = gin.H{
+		"status": "ok",
+		"message": "Data aggregation not yet implemented",
+	}
+
 	data.Services["workforce_wellbeing"] = gin.H{
 		"status": "ok",
 		"message": "Data aggregation not yet implemented",

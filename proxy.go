@@ -60,8 +60,15 @@ func (p *ProxyHandler) getServiceURL(serviceName string) string {
 	case "task_dispatcher":
 		return p.config.ServiceURLs.TaskDispatcher
 
+	// User Preferences Bounded Context
+	case "user_preferences":
+		return p.config.ServiceURLs.UserPreferences
+	case "preferences_service":
+		return p.config.ServiceURLs.PreferencesService
+
 	default:
-		return ""
+		// Fall back to generated service URLs
+		return p.getGeneratedServiceURL(serviceName)
 	}
 }
 
@@ -171,6 +178,18 @@ func (p *ProxyHandler) proxyRequest(c *gin.Context, targetURL, targetPath string
 		req.Header.Set("X-Forwarded-For", c.ClientIP())
 		req.Header.Set("X-Forwarded-Proto", "http")
 		req.Header.Set("X-Real-IP", c.ClientIP())
+
+		// Forward user info from auth middleware
+		if userID, exists := c.Get("user_id"); exists {
+			if uid, ok := userID.(string); ok && uid != "" {
+				req.Header.Set("X-User-ID", uid)
+			}
+		}
+		if email, exists := c.Get("email"); exists {
+			if e, ok := email.(string); ok && e != "" {
+				req.Header.Set("X-User-Email", e)
+			}
+		}
 	}
 
 	// Handle errors
