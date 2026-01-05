@@ -5,8 +5,8 @@
 // Aggregates data from multiple bounded contexts for the dashboard
 //
 // Associated Frontend Files:
-//   - web/app/src/pages/DashboardPage.tsx (main dashboard view)
-//   - web/app/src/lib/api.ts (api.get('/dashboard') call)
+//   - web/app/src/pages/DashboardPage.tsx (dashboard UI - calls /hr-management/dashboard)
+//   - web/app/src/lib/api.ts (apiClient - API client for dashboard data fetching)
 package handlers
 
 import (

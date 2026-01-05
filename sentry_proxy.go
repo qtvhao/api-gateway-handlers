@@ -5,9 +5,9 @@
 // Proxies error tracking requests to the Bugsink service
 //
 // Associated Frontend Files:
-//   - web/app/src/lib/error-tracking.ts (Sentry SDK initialization and error capture)
-//   - web/app/src/lib/api.ts (error capture to Sentry on API failures)
-//   - web/app/src/main.tsx (Sentry initialization on app start)
+//   - web/app/src/lib/error-tracking.ts (errorTracker - Sentry SDK initialization and error capture)
+//   - web/app/src/main.tsx (Sentry initialization with DSN/tunnel config)
+//   - web/app/src/lib/api.ts (API error capture to Sentry)
 package handlers
 
 import (
